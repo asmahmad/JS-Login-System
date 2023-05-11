@@ -1,43 +1,52 @@
 var usernameTextbox = document.querySelector('#username')
+//var myPromise = new Promise((resolve, reject)=>{
+//	let i = 1;
 
-usernameTextbox.addEventListener('blur', () => {
-	var user = {
+//	if(i==1){
+//		resolve("hey, i == 1, so we are cool!")
+
+//	}else {
+//		reject("Absolute fail. i is not 1, boooo")
+//	}
+//})
+//myPromise.then((message)=>{
+//	consloe.log(message)
+//}).catch((message)=>{
+//	console.log(message)
+//})
+usernameTextbox.addEventListener('blur', async () => {
+	const user = {
 		'username': usernameTextbox.value,
-	}
-	fetch('/users/exists', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(user)
-	})
-		.then((responseEntity) => responseEntity.json())
-		.then((data) => {
-			if (data === true) {
-				// this users already exists!
-				console.log("username already exists")
-				usernameTextbox.focus()
-				usernameTextbox.select()
-				showErrorAnimation(() => {
-					// animation is completed at this point
-					console.log("We are now in the callback function")
-					usernameTextbox.style.backgroundColor ='rgb(255,255,255)'
-				})
-			}
-		})
-})
-
-function showErrorAnimation(callback) {
-	console.log("We are in the showErrorAnimation function")
-	var i = 0
-	setInterval(() => {
-		i++
-		usernameTextbox.style.backgroundColor = `rgb(${i},0,0)`
-		if (i >= 255) {
-			clearInterval(animationInterval)
-			consloe.log("Done executing animation code")
-			callback()
+	};
+	try {
+		const responseEntity = await fetch('/users/exists', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(user)
+		});
+		const data = await responseEntity.json();
+		if (data === true) {
+			console.log("username already exists")
+			usernameTextbox.focus();
+			usernameTextbox.select();
+			await showErrorAnimation();
+			console.log("We're now in the callback function");
+			usernameTextbox.style.backgroundColor = 'rgb(255,255,255)';
 		}
-	}, 1)
+	} catch (error) {
+		console.error(error);
+	}
+});
 
+async function showErrorAnimation() {
+	console.log("We're in the showErrorAnimation function");
+	let i = 0;
+	while (i < 255) {
+		i++;
+		usernameTextbox.style.backgroundColor = `rgb(${i}, 0, 0)`;
+		await new Promise((resolve) => setTimeout(resolve, 1));
+	}
+	console.log("Done executing animation code");
 }
